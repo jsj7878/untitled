@@ -16,6 +16,7 @@ class React360 extends Component {
     componentDidMount = () => {
         // Pointer events do not need to be attached to document directly for "move" and "end"
         // It will be handled by the specific element
+        this.preloadImages()
     };
 
     componentWillUnmount = () => {
@@ -61,6 +62,22 @@ class React360 extends Component {
 
     preventDragHandler = (e) => {
         e.preventDefault();
+    };
+
+    preloadImages = () => {
+        const { dir, numImages } = this.props;
+        let imagesLoaded = [];
+
+        for (let i = 1; i <= numImages; i++) {
+            const image = new Image();
+            image.src = require(`./${dir}/image${i}.jpg`);
+            image.onload = () => {
+                imagesLoaded.push(i);
+                if (imagesLoaded.length === numImages) {
+                    this.setState({ imagesLoaded });
+                }
+            };
+        }
     };
 
     renderImage = () => {
