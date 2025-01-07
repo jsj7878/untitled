@@ -14,12 +14,12 @@ class React360 extends Component {
     };
 
     componentDidMount = () => {
-        document.addEventListener("touchmove", this.handleTouchMove, false);
+        document.addEventListener("touchstart", this.handleTouchMove, false);
         document.addEventListener("touchend", this.handleTouchEnd, false);
     };
 
     componentWillUnmount = () => {
-        document.removeEventListener("touchmove", this.handleTouchMove, false);
+        document.removeEventListener("touchstart", this.handleTouchMove, false);
         document.removeEventListener("touchend", this.handleTouchEnd, false);
     };
 
