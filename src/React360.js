@@ -14,26 +14,31 @@ class React360 extends Component {
     };
 
     componentDidMount = () => {
-        document.addEventListener("touchstart", this.handleTouchMove, false);
-        document.addEventListener("touchend", this.handleTouchEnd, false);
+        // Pointer events do not need to be attached to document directly for "move" and "end"
+        // It will be handled by the specific element
     };
 
     componentWillUnmount = () => {
-        document.removeEventListener("touchstart", this.handleTouchMove, false);
-        document.removeEventListener("touchend", this.handleTouchEnd, false);
+        // No need to remove event listeners from document
     };
 
-    handleTouchStart = (e) => {
-        const touch = e.touches[0]; // 첫 번째 터치 포인트
-        this.setState((state) => ({
+    handlePointerDown = (e) => {
+        // Pointer events give us clientX and clientY directly
+        this.setState({
             dragging: true,
-            dragStart: touch.clientX,
-            dragStartIndex: state.imageIndex
-        }));
+            dragStart: e.clientX,
+            dragStartIndex: this.state.imageIndex
+        });
     };
 
-    handleTouchEnd = () => {
+    handlePointerUp = () => {
         this.setState({ dragging: false });
+    };
+
+    handlePointerMove = (e) => {
+        if (this.state.dragging) {
+            this.updateImageIndex(e.clientX);
+        }
     };
 
     updateImageIndex = (currentPosition) => {
@@ -51,13 +56,6 @@ class React360 extends Component {
 
         if (index !== imageIndex) {
             this.setState({ imageIndex: index });
-        }
-    };
-
-    handleTouchMove = (e) => {
-        if (this.state.dragging) {
-            const touch = e.touches[0]; // 첫 번째 터치 포인트
-            this.updateImageIndex(touch.clientX);
         }
     };
 
@@ -83,9 +81,9 @@ class React360 extends Component {
         return (
             <div
                 className="react-360-img"
-                onTouchStart={this.handleTouchStart}
-                onTouchMove={this.handleTouchMove}
-                onTouchEnd={this.handleTouchEnd}
+                onPointerDown={this.handlePointerDown}  // Pointer down event
+                onPointerMove={this.handlePointerMove}  // Pointer move event
+                onPointerUp={this.handlePointerUp}      // Pointer up event
                 onDragStart={this.preventDragHandler}
             >
                 {this.renderImage()}
