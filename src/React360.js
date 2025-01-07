@@ -1,8 +1,7 @@
 import React, { Component } from "react";
 import "./React360.css";
 
-// You can play with this to adjust the sensitivity
-// higher values make mouse less sensitive
+// Adjust this value to control sensitivity
 const pixelsPerDegree = 3;
 
 class React360 extends Component {
@@ -15,29 +14,29 @@ class React360 extends Component {
     };
 
     componentDidMount = () => {
-        document.addEventListener("mousemove", this.handleMouseMove, false);
-        document.addEventListener("mouseup", this.handleMouseUp, false);
+        document.addEventListener("touchmove", this.handleTouchMove, false);
+        document.addEventListener("touchend", this.handleTouchEnd, false);
     };
 
     componentWillUnmount = () => {
-        document.removeEventListener("mousemove", this.handleMouseMove, false);
-        document.removeEventListener("mouseup", this.handleMouseUp, false);
+        document.removeEventListener("touchmove", this.handleTouchMove, false);
+        document.removeEventListener("touchend", this.handleTouchEnd, false);
     };
 
-    handleMouseDown = e => {
-        e.persist();
-        this.setState(state => ({
+    handleTouchStart = (e) => {
+        const touch = e.touches[0]; // 첫 번째 터치 포인트
+        this.setState((state) => ({
             dragging: true,
-            dragStart: e.screenX,
+            dragStart: touch.clientX,
             dragStartIndex: state.imageIndex
         }));
     };
 
-    handleMouseUp = () => {
+    handleTouchEnd = () => {
         this.setState({ dragging: false });
     };
 
-    updateImageIndex = currentPosition => {
+    updateImageIndex = (currentPosition) => {
         let numImages = this.props.numImages;
         const pixelsPerImage = pixelsPerDegree * (360 / numImages);
         const { dragStart, imageIndex, dragStartIndex } = this.state;
@@ -49,19 +48,20 @@ class React360 extends Component {
             index = numImages + index - 1;
         }
         index = (index + dragStartIndex) % numImages;
-        // console.log(index, dragStartIndex, numImages)
+
         if (index !== imageIndex) {
             this.setState({ imageIndex: index });
         }
     };
 
-    handleMouseMove = e => {
+    handleTouchMove = (e) => {
         if (this.state.dragging) {
-            this.updateImageIndex(e.screenX);
+            const touch = e.touches[0]; // 첫 번째 터치 포인트
+            this.updateImageIndex(touch.clientX);
         }
     };
 
-    preventDragHandler = e => {
+    preventDragHandler = (e) => {
         e.preventDefault();
     };
 
@@ -73,7 +73,7 @@ class React360 extends Component {
                 <img
                     className="react-360-img"
                     alt=""
-                    src={require(`./${this.props.dir}/image${imageIndex+1}.jpg`)}
+                    src={require(`./${this.props.dir}/image${imageIndex + 1}.jpg`)}
                 />
             </div>
         );
@@ -83,7 +83,9 @@ class React360 extends Component {
         return (
             <div
                 className="react-360-img"
-                onMouseDown={this.handleMouseDown}
+                onTouchStart={this.handleTouchStart}
+                onTouchMove={this.handleTouchMove}
+                onTouchEnd={this.handleTouchEnd}
                 onDragStart={this.preventDragHandler}
             >
                 {this.renderImage()}
