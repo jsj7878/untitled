@@ -30,7 +30,7 @@ class React360 extends Component {
     };
 
     startInitialAnimation = () => {
-        const { numImages } = this.props;
+
         let currentIndex = 0;
 
         // Interval to increment the imageIndex
