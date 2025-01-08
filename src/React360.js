@@ -10,21 +10,39 @@ class React360 extends Component {
     state = {
         dragging: false,
         imageIndex: 0,
-        dragStartIndex: 0
+        dragStartIndex: 0,
+        imagesLoaded: [],
     };
 
     componentDidMount = () => {
-        // Pointer events do not need to be attached to document directly for "move" and "end"
-        // It will be handled by the specific element
-        document.addEventListener("touchmove", this.handleTouchMove, false);
-        document.addEventListener("touchend", this.handleTouchEnd, false);
-        this.preloadImages()
+        // Preload images
+        this.preloadImages();
+
+        // Start the initial animation
+        this.startInitialAnimation();
     };
 
     componentWillUnmount = () => {
-        // No need to remove event listeners from document
-        document.removeEventListener("touchmove", this.handleTouchMove, false);
-        document.removeEventListener("touchend", this.handleTouchEnd, false);
+        // Clear any intervals when the component is unmounted
+        if (this.animationInterval) {
+            clearInterval(this.animationInterval);
+        }
+    };
+
+    startInitialAnimation = () => {
+        const { numImages } = this.props;
+        let currentIndex = 0;
+
+        // Interval to increment the imageIndex
+        this.animationInterval = setInterval(() => {
+            if (currentIndex < 25) {
+                this.setState({ imageIndex: currentIndex%24 });
+                currentIndex++;
+            } else {
+                // Stop the animation after reaching the 24th image
+                clearInterval(this.animationInterval);
+            }
+        }, 100); // Adjust the delay (100ms) for smoothness
     };
 
     handleTouchStart = (e) => {
@@ -32,7 +50,7 @@ class React360 extends Component {
         this.setState((state) => ({
             dragging: true,
             dragStart: touch.clientX,
-            dragStartIndex: state.imageIndex
+            dragStartIndex: state.imageIndex,
         }));
     };
 
@@ -47,30 +65,10 @@ class React360 extends Component {
         }
     };
 
-    handlePointerDown = (e) => {
-        // Pointer events give us clientX and clientY directly
-        this.setState({
-            dragging: true,
-            dragStart: e.clientX,
-            dragStartIndex: this.state.imageIndex
-        });
-    };
-
-    handlePointerUp = () => {
-        this.setState({ dragging: false });
-    };
-
-    handlePointerMove = (e) => {
-        if (this.state.dragging) {
-            this.updateImageIndex(e.clientX);
-        }
-    };
-
     updateImageIndex = (currentPosition) => {
-        let numImages = this.props.numImages;
+        const { numImages } = this.props;
         const pixelsPerImage = pixelsPerDegree * (360 / numImages);
         const { dragStart, imageIndex, dragStartIndex } = this.state;
-        // pixels moved
         let dx = (currentPosition - dragStart) / pixelsPerImage;
         let index = Math.floor(dx) % numImages;
 
@@ -125,9 +123,6 @@ class React360 extends Component {
                 onTouchStart={this.handleTouchStart}
                 onTouchMove={this.handleTouchMove}
                 onTouchEnd={this.handleTouchEnd}
-                // onPointerDown={this.handlePointerDown}  // Pointer down event
-                // onPointerMove={this.handlePointerMove}  // Pointer move event
-                // onPointerUp={this.handlePointerUp}      // Pointer up event
                 onDragStart={this.preventDragHandler}
             >
                 {this.renderImage()}
