@@ -16,11 +16,35 @@ class React360 extends Component {
     componentDidMount = () => {
         // Pointer events do not need to be attached to document directly for "move" and "end"
         // It will be handled by the specific element
+        document.addEventListener("touchmove", this.handleTouchMove, false);
+        document.addEventListener("touchend", this.handleTouchEnd, false);
         this.preloadImages()
     };
 
     componentWillUnmount = () => {
         // No need to remove event listeners from document
+        document.removeEventListener("touchmove", this.handleTouchMove, false);
+        document.removeEventListener("touchend", this.handleTouchEnd, false);
+    };
+
+    handleTouchStart = (e) => {
+        const touch = e.touches[0]; // 첫 번째 터치 포인트
+        this.setState((state) => ({
+            dragging: true,
+            dragStart: touch.clientX,
+            dragStartIndex: state.imageIndex
+        }));
+    };
+
+    handleTouchEnd = () => {
+        this.setState({ dragging: false });
+    };
+
+    handleTouchMove = (e) => {
+        if (this.state.dragging) {
+            const touch = e.touches[0]; // 첫 번째 터치 포인트
+            this.updateImageIndex(touch.clientX);
+        }
     };
 
     handlePointerDown = (e) => {
@@ -98,9 +122,12 @@ class React360 extends Component {
         return (
             <div
                 className="react-360-img"
-                onPointerDown={this.handlePointerDown}  // Pointer down event
-                onPointerMove={this.handlePointerMove}  // Pointer move event
-                onPointerUp={this.handlePointerUp}      // Pointer up event
+                onTouchStart={this.handleTouchStart}
+                onTouchMove={this.handleTouchMove}
+                onTouchEnd={this.handleTouchEnd}
+                // onPointerDown={this.handlePointerDown}  // Pointer down event
+                // onPointerMove={this.handlePointerMove}  // Pointer move event
+                // onPointerUp={this.handlePointerUp}      // Pointer up event
                 onDragStart={this.preventDragHandler}
             >
                 {this.renderImage()}
