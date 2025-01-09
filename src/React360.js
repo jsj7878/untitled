@@ -5,7 +5,6 @@ import "./React360.css";
 const pixelsPerDegree = 3;
 
 class React360 extends Component {
-    static defaultProps = { dir: "awair-360", numImages: 55 };
 
     state = {
         dragging: false,
@@ -35,8 +34,8 @@ class React360 extends Component {
 
         // Interval to increment the imageIndex
         this.animationInterval = setInterval(() => {
-            if (currentIndex < 25) {
-                this.setState({ imageIndex: currentIndex%24 });
+            if (currentIndex < 37) {
+                this.setState({ imageIndex: currentIndex%36 });
                 currentIndex++;
             } else {
                 // Stop the animation after reaching the 24th image
@@ -87,12 +86,12 @@ class React360 extends Component {
     };
 
     preloadImages = () => {
-        const { dir, numImages } = this.props;
+        const { images, numImages } = this.props;
         let imagesLoaded = [];
 
         for (let i = 1; i <= numImages; i++) {
             const image = new Image();
-            image.src = require(`./${dir}/image${i}.jpg`);
+            image.src = (images[i]);
             image.onload = () => {
                 imagesLoaded.push(i);
                 if (imagesLoaded.length === numImages) {
@@ -104,13 +103,13 @@ class React360 extends Component {
 
     renderImage = () => {
         const { imageIndex } = this.state;
-
+        const {images} = this.props
         return (
             <div className="react360">
                 <img
                     className="react-360-img"
                     alt=""
-                    src={require(`./${this.props.dir}/image${imageIndex + 1}.jpg`)}
+                    src={(images[imageIndex])}
                 />
             </div>
         );
